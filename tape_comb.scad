@@ -1,6 +1,9 @@
 module tape_comb(
     count = 20,
 
+    marker = 5,
+    marker_engraving_diameter = 2,
+
     width = 20,
     height = 2,
 
@@ -12,6 +15,7 @@ module tape_comb(
     clearance = 1,
 
     engraving_depth = 1,
+    engraving_clearance = 2,
 
     2d_projection = false,
 
@@ -21,6 +25,9 @@ module tape_comb(
     e = .0319;
 
     length = count * plot;
+
+    engraving_z = 2d_projection ? -e : engraving_depth;
+    _engraving_depth = 2d_projection ? height + e * 2 : engraving_depth + e;
 
     module _leads(
         _width = width,
@@ -39,18 +46,39 @@ module tape_comb(
         }
     }
 
-    module _engraving(projection = true) {
-        x = (width - (tine + clearance)) / 2;
-        z = projection ? -e : engraving_depth;
+    module _engraving() {
+        available_width = width
+            - (tine + clearance + marker_engraving_diameter + engraving_clearance);
+        size = available_width - engraving_clearance * 2;
+        x = available_width / 2;
 
-        translate([x, length / 2, z]) {
-            rotate([0, 0, 90]) {
-                linear_extrude(projection ? height + e * 2 : engraving_depth + e) {
+        translate([x, length - engraving_clearance, engraving_z]) {
+            rotate([0, 0, -90]) {
+                linear_extrude(_engraving_depth) {
                     offset(delta = tolerance) text(
                         font="Orbitron",
-                        text = str(count, "x", plot),
-                        halign = "center",
+                        text = str(count, "x", plot, "mm"),
+                        size = size,
+                        halign = "left",
                         valign = "center"
+                    );
+                }
+            }
+        }
+    }
+
+    module _markers() {
+        x = width - (marker_engraving_diameter / 2 + tine + clearance + engraving_clearance);
+
+        for (i = [1 : count - 1]) {
+            if (i % marker == 0) {
+                y = length - i * plot;
+
+                translate([x, y, engraving_z]) {
+                    cylinder(
+                        d = marker_engraving_diameter + tolerance * 2,
+                        h = _engraving_depth,
+                        $fn = 6
                     );
                 }
             }
@@ -69,6 +97,8 @@ module tape_comb(
             );
 
             _engraving();
+
+            _markers();
         }
     }
 
@@ -83,4 +113,8 @@ module tape_comb(
     }
 }
 
-tape_comb(2d_projection = 0);
+tape_comb(
+    /* count = 21,
+    marker = 7, */
+    2d_projection = false
+);
