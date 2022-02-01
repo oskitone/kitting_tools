@@ -24,7 +24,10 @@ module tape_comb(
 ) {
     e = .0319;
 
-    length = count * plot;
+    length_between_leads = plot - lead_diameter;
+    end_length = length_between_leads / 2 * .667;
+
+    length = count * plot + end_length * 2;
 
     engraving_z = 2d_projection ? -e : engraving_depth;
     _engraving_depth = 2d_projection ? height + e * 2 : engraving_depth + e;
@@ -33,12 +36,13 @@ module tape_comb(
         _width = width,
         _length = lead_diameter,
         _height = lead_diameter,
-        x = 0
+        x = 0,
+        range = [0 : count - 1]
     ) {
         z = (height - _height) / 2;
 
-        for (i = [0 : count - 1]) {
-            y = i * plot + (plot - _length) / 2;
+        for (i = range) {
+            y = i * plot + (plot - _length) / 2 + end_length;
 
             translate([x, y, z]) {
                 cube([_width, _length, _height]);
@@ -68,11 +72,12 @@ module tape_comb(
     }
 
     module _markers() {
-        x = width - (marker_engraving_diameter / 2 + tine + clearance + engraving_clearance);
+        x = width - (marker_engraving_diameter / 2 + tine + clearance
+            + engraving_clearance);
 
         for (i = [1 : count - 1]) {
             if (i % marker == 0) {
-                y = length - i * plot;
+                y = length - i * plot - end_length;
 
                 translate([x, y, engraving_z]) {
                     cylinder(
@@ -108,7 +113,10 @@ module tape_comb(
         _output();
 
         if (visualize_leads) {
-            % # _leads(x = width - tine);
+            % # _leads(
+                x = width - tine,
+                range = [-1 : count]
+            );
         }
     }
 }
