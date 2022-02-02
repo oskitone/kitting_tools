@@ -5,14 +5,14 @@ module tape_comb(
     marker_engraving_diameter = 2,
 
     width = 20,
-    height = 2,
+    height = 1.6,
 
     plot = 5,
 
     tine = 2,
 
     tolerance = .1,
-    clearance = 1,
+    clearance = .5,
 
     engraving_depth = 1,
     engraving_clearance = 2,
@@ -25,7 +25,7 @@ module tape_comb(
     e = .0319;
 
     length_between_leads = plot - lead_diameter;
-    end_length = length_between_leads / 2 * .667;
+    end_length = length_between_leads / 2 - clearance;
 
     length = count * plot + end_length * 2;
 
@@ -60,9 +60,9 @@ module tape_comb(
 
     module _engraving() {
         available_width = width
-            - (tine + clearance + marker_engraving_diameter + engraving_clearance);
-        size = available_width - engraving_clearance * 2;
-        x = available_width / 2;
+            - (tine + marker_engraving_diameter + engraving_clearance);
+        size = 6;
+        x = engraving_clearance + size / 2;
 
         translate([x, length - engraving_clearance, engraving_z]) {
             rotate([0, 0, -90]) {
@@ -80,7 +80,7 @@ module tape_comb(
     }
 
     module _markers() {
-        x = width - (marker_engraving_diameter / 2 + tine + clearance
+        x = width - (marker_engraving_diameter / 2 + tine
             + engraving_clearance);
 
         for (i = [1 : count - 1]) {
@@ -103,10 +103,10 @@ module tape_comb(
             cube([width, length, height]);
 
             _leads(
-                _width = tine + clearance,
-                _length = lead_diameter + clearance * 2,
+                _width = tine + tolerance + e,
+                _length = lead_diameter + (clearance + tolerance) * 2,
                 _height = height + 1,
-                x = width - tine - clearance
+                x = width - tine - tolerance
             );
 
             _engraving();
