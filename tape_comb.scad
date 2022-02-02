@@ -46,6 +46,14 @@ module tape_comb(
 
             translate([x, y, z]) {
                 cube([_width, _length, _height]);
+
+                translate([0, _length / 2, 0]) {
+                    cylinder(
+                        d = _length,
+                        h = _height,
+                        $fn = 4
+                    );
+                }
             }
         }
     }
