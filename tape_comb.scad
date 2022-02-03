@@ -1,7 +1,7 @@
 module tape_comb(
     count = 20,
 
-    marker = 5,
+    marker_cadence = 5,
     marker_engraving_diameter = 2,
 
     width = 20,
@@ -84,7 +84,7 @@ module tape_comb(
             + engraving_clearance);
 
         for (i = [1 : count - 1]) {
-            if (i % marker == 0) {
+            if (i % marker_cadence == 0) {
                 y = length - i * plot - end_length;
 
                 translate([x, y, engraving_z]) {
@@ -131,6 +131,6 @@ module tape_comb(
 
 tape_comb(
     /* count = 21,
-    marker = 7, */
+    marker_cadence = 7, */
     2d_projection = false
 );
